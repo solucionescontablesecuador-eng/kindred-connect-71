@@ -2,7 +2,7 @@ import { ExtraordinaryFee } from "@/hooks/useExtraordinaryFees";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Calendar, DollarSign } from "lucide-react";
+import { Edit, Calendar, DollarSign } from "lucide-react";
 
 interface ExtraordinaryFeeCardProps {
   fee: ExtraordinaryFee;
@@ -64,7 +64,7 @@ export function ExtraordinaryFeeCard({
           <Edit className="mr-2 h-4 w-4" /> Editar
         </Button>
         <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => onDelete(fee)}>
-          <Trash2 className="mr-2 h-4 w-4" /> Borrar
+           Borrar
         </Button>
       </CardFooter>
     </Card>);

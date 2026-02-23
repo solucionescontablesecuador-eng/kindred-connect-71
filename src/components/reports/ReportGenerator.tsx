@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue } from
 "@/components/ui/select";
-import { FileText, Download } from "lucide-react";
+import { Download } from "lucide-react";
 
 interface ReportGeneratorProps {
   apartments: Apartment[];
@@ -152,7 +152,7 @@ export function ReportGenerator({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            
             Generar Reporte
           </CardTitle>
         </CardHeader>

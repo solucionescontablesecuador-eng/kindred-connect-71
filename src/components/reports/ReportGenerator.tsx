@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue } from
 "@/components/ui/select";
-import { Download } from "lucide-react";
+
 
 interface ReportGeneratorProps {
   apartments: Apartment[];
@@ -199,7 +199,7 @@ export function ReportGenerator({
               Ver Reporte
             </Button>
             <Button variant="outline" onClick={generatePrintableReport}>
-              <Download className="mr-2 h-4 w-4" />
+              
               Descargar PDF
             </Button>
           </div>

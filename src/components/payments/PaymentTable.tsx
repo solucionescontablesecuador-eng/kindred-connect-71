@@ -208,7 +208,7 @@ export function PaymentTable({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button
-                                className={`inline-flex items-center justify-center h-8 w-full rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                                className={`inline-flex items-center justify-center h-8 w-full rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                                   isPaid
                                     ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25"
                                     : overdue
@@ -217,7 +217,7 @@ export function PaymentTable({
                                 }`}
                                 onClick={() => handleCellClick(apartment, month)}
                               >
-                                {isPaid ? "✓" : overdue ? "!" : "—"}
+                                ${isPaid ? payment?.amount : monthlyFee}
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>

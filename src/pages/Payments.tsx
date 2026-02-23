@@ -40,8 +40,8 @@ function PaymentsContent() {
     await upsertPayment.mutateAsync(data);
   };
 
-  const handleUploadReceipt = async (file: File, apartmentId: string, year: number, month: number) => {
-    return await uploadReceipt(file, apartmentId, year, month);
+  const handleUploadReceipt = async (file: File) => {
+    return await uploadReceipt(file);
   };
 
   if (isLoading) {
@@ -112,6 +112,7 @@ function PaymentsContent() {
           payments={payments}
           year={year}
           monthlyFee={building?.monthly_fee || 0}
+          cutoffDay={building?.cutoff_day || 5}
           onUpdatePayment={handleUpdatePayment}
           onUploadReceipt={handleUploadReceipt}
         />

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -18,6 +19,7 @@ function SettingsContent() {
   const [buildingName, setBuildingName] = useState("");
   const [address, setAddress] = useState("");
   const [monthlyFee, setMonthlyFee] = useState("0");
+  const [cutoffDay, setCutoffDay] = useState("5");
   const [isSavingBuilding, setIsSavingBuilding] = useState(false);
 
   const [fullName, setFullName] = useState("");
@@ -30,6 +32,7 @@ function SettingsContent() {
       setBuildingName(building.name);
       setAddress(building.address || "");
       setMonthlyFee(building.monthly_fee.toString());
+      setCutoffDay((building.cutoff_day || 5).toString());
     }
   }, [building]);
 
@@ -48,6 +51,7 @@ function SettingsContent() {
         name: buildingName,
         address: address || null,
         monthly_fee: parseFloat(monthlyFee),
+        cutoff_day: parseInt(cutoffDay),
       });
       toast.success("Configuración del edificio guardada");
     } catch (error) {
@@ -82,6 +86,8 @@ function SettingsContent() {
       </div>
     );
   }
+
+  const days = Array.from({ length: 28 }, (_, i) => i + 1);
 
   return (
     <div className="space-y-6">
@@ -133,6 +139,25 @@ function SettingsContent() {
                 value={monthlyFee}
                 onChange={(e) => setMonthlyFee(e.target.value)}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cutoffDay">Día de Corte</Label>
+              <Select value={cutoffDay} onValueChange={setCutoffDay}>
+                <SelectTrigger id="cutoffDay">
+                  <SelectValue placeholder="Selecciona el día" />
+                </SelectTrigger>
+                <SelectContent>
+                  {days.map((day) => (
+                    <SelectItem key={day} value={day.toString()}>
+                      Día {day} de cada mes
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Los pagos pendientes se marcarán en rojo después de este día
+              </p>
             </div>
 
             <Button onClick={handleSaveBuilding} disabled={isSavingBuilding}>

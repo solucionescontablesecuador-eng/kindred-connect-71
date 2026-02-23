@@ -4,6 +4,7 @@ import { ApartmentForm } from "@/components/apartments/ApartmentForm";
 import { ApartmentCard } from "@/components/apartments/ApartmentCard";
 import { useApartments, Apartment } from "@/hooks/useApartments";
 import { usePayments } from "@/hooks/usePayments";
+import { useExtraordinaryFees } from "@/hooks/useExtraordinaryFees";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -11,11 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ApartmentFormData } from "@/lib/validations";
 
+const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
 function ApartmentsContent() {
   const { apartments, isLoading, createApartment, updateApartment, deleteApartment } = useApartments();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const { payments } = usePayments(currentYear);
+  const { fees, payments: extraPayments } = useExtraordinaryFees();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingApartment, setEditingApartment] = useState<Apartment | null>(null);
@@ -29,6 +33,28 @@ function ApartmentsContent() {
   const isApartmentPaidThisMonth = (apartmentId: string) => {
     const payment = payments.find(p => p.apartment_id === apartmentId && p.month === currentMonth);
     return payment?.status === "paid";
+  };
+
+  const getPendingSummary = (apartmentId: string) => {
+    // Pending monthly payments this year
+    const pendingMonths: string[] = [];
+    for (let m = 1; m <= currentMonth; m++) {
+      const payment = payments.find(p => p.apartment_id === apartmentId && p.month === m);
+      if (!payment || payment.status !== "paid") {
+        pendingMonths.push(MONTH_NAMES[m - 1]);
+      }
+    }
+
+    // Pending extraordinary fees
+    const pendingExtraordinary: string[] = [];
+    fees.forEach(fee => {
+      const ep = extraPayments.find(p => p.fee_id === fee.id && p.apartment_id === apartmentId);
+      if (!ep || ep.status !== "paid") {
+        pendingExtraordinary.push(fee.title);
+      }
+    });
+
+    return { pendingMonths, pendingExtraordinary };
   };
 
   const handleCreate = async (data: ApartmentFormData) => {
@@ -135,7 +161,8 @@ function ApartmentsContent() {
             <ApartmentCard 
               key={apartment.id} 
               apartment={apartment} 
-              isPaidThisMonth={isApartmentPaidThisMonth(apartment.id)} 
+              isPaidThisMonth={isApartmentPaidThisMonth(apartment.id)}
+              pendingSummary={getPendingSummary(apartment.id)}
               onEdit={handleEdit} 
               onDelete={setDeletingApartment} 
             />

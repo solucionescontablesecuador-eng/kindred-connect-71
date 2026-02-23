@@ -17,6 +17,11 @@ import {
 import { Loader2, Upload, FileText, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
+const MONTH_NAMES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
 interface PaymentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,13 +40,8 @@ interface PaymentModalProps {
     receipt_url?: string | null;
     notes?: string | null;
   }) => Promise<void>;
-  onUploadReceipt: (file: File, apartmentId: string, year: number, month: number) => Promise<string>;
+  onUploadReceipt: (file: File) => Promise<string>;
 }
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
 
 export function PaymentModal({
   open,
@@ -71,11 +71,11 @@ export function PaymentModal({
 
     setIsUploading(true);
     try {
-      const url = await onUploadReceipt(file, apartment.id, year, month);
+      const url = await onUploadReceipt(file);
       setReceiptUrl(url);
-      toast.success("Receipt uploaded successfully");
+      toast.success("Comprobante subido correctamente");
     } catch (error) {
-      toast.error("Failed to upload receipt");
+      toast.error("Error al subir comprobante");
     } finally {
       setIsUploading(false);
     }
@@ -83,7 +83,7 @@ export function PaymentModal({
 
   const handleSubmit = async () => {
     if (isPaid && !receiptUrl) {
-      toast.error("Please upload a payment receipt");
+      toast.error("Sube un comprobante de pago");
       return;
     }
 
@@ -99,10 +99,10 @@ export function PaymentModal({
         receipt_url: receiptUrl || null,
         notes: notes || null,
       });
-      toast.success("Payment updated successfully");
+      toast.success("Pago actualizado");
       onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to update payment");
+      toast.error("Error al actualizar pago");
     } finally {
       setIsSubmitting(false);
     }
@@ -113,7 +113,7 @@ export function PaymentModal({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            Payment - Apt. {apartment.apartment_number}
+            Pago — Apt. {apartment.apartment_number}
           </DialogTitle>
           <DialogDescription>
             {MONTH_NAMES[month - 1]} {year} • {apartment.owner_full_name}
@@ -122,7 +122,7 @@ export function PaymentModal({
 
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="isPaid" className="text-base">Mark as Paid</Label>
+            <Label htmlFor="isPaid" className="text-base">Marcar como pagado</Label>
             <Switch
               id="isPaid"
               checked={isPaid}
@@ -131,7 +131,7 @@ export function PaymentModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Monto</Label>
             <Input
               id="amount"
               type="number"
@@ -144,7 +144,7 @@ export function PaymentModal({
           {isPaid && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="paymentDate">Payment Date</Label>
+                <Label htmlFor="paymentDate">Fecha de pago</Label>
                 <Input
                   id="paymentDate"
                   type="date"
@@ -154,7 +154,7 @@ export function PaymentModal({
               </div>
 
               <div className="space-y-2">
-                <Label>Payment Receipt</Label>
+                <Label>Comprobante de pago</Label>
                 <div className="flex items-center gap-2">
                   <input
                     ref={fileInputRef}
@@ -175,7 +175,7 @@ export function PaymentModal({
                     ) : (
                       <Upload className="mr-2 h-4 w-4" />
                     )}
-                    Upload Receipt
+                    Subir comprobante
                   </Button>
                   {receiptUrl && (
                     <Button
@@ -193,7 +193,7 @@ export function PaymentModal({
                 {receiptUrl && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <FileText className="h-4 w-4" />
-                    <span className="truncate">Receipt uploaded</span>
+                    <span className="truncate">Comprobante subido</span>
                   </div>
                 )}
               </div>
@@ -201,10 +201,10 @@ export function PaymentModal({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes (optional)</Label>
+            <Label htmlFor="notes">Notas (opcional)</Label>
             <Textarea
               id="notes"
-              placeholder="Add any notes..."
+              placeholder="Agregar notas..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -213,11 +213,11 @@ export function PaymentModal({
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Payment
+            Guardar
           </Button>
         </DialogFooter>
       </DialogContent>

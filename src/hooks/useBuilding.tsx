@@ -7,6 +7,7 @@ export interface Building {
   name: string;
   address: string | null;
   monthly_fee: number;
+  cutoff_day: number;
   admin_id: string;
   created_at: string;
   updated_at: string;

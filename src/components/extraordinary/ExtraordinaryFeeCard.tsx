@@ -2,7 +2,7 @@ import { ExtraordinaryFee } from "@/hooks/useExtraordinaryFees";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, DollarSign } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 interface ExtraordinaryFeeCardProps {
   fee: ExtraordinaryFee;
@@ -38,7 +38,7 @@ export function ExtraordinaryFeeCard({
       </CardHeader>
       <CardContent className="flex-1 space-y-3 pt-2">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <DollarSign className="h-4 w-4 text-primary" />
+          
           <span className="font-bold text-foreground">${fee.amount.toFixed(2)}</span>
           <span>por apartamento</span>
         </div>

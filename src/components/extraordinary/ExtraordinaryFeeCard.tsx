@@ -2,7 +2,7 @@ import { ExtraordinaryFee } from "@/hooks/useExtraordinaryFees";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Calendar, DollarSign } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign } from "lucide-react";
 
 interface ExtraordinaryFeeCardProps {
   fee: ExtraordinaryFee;
@@ -13,15 +13,15 @@ interface ExtraordinaryFeeCardProps {
   totalCount: number;
 }
 
-export function ExtraordinaryFeeCard({ 
-  fee, 
-  onEdit, 
-  onDelete, 
+export function ExtraordinaryFeeCard({
+  fee,
+  onEdit,
+  onDelete,
   onViewDetails,
   paidCount,
   totalCount
 }: ExtraordinaryFeeCardProps) {
-  const progress = totalCount > 0 ? (paidCount / totalCount) * 100 : 0;
+  const progress = totalCount > 0 ? paidCount / totalCount * 100 : 0;
 
   return (
     <Card className="flex flex-col transition-shadow hover:shadow-md">
@@ -50,15 +50,15 @@ export function ExtraordinaryFeeCard({
           Recaudación: {paidCount} de {totalCount} apartamentos
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div 
-            className="h-full bg-primary transition-all" 
-            style={{ width: `${progress}%` }}
-          />
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${progress}%` }} />
+
         </div>
       </CardContent>
       <CardFooter className="grid grid-cols-3 gap-2 pt-2">
         <Button variant="outline" size="sm" onClick={() => onViewDetails(fee)}>
-          <Eye className="mr-2 h-4 w-4" /> Detalles
+           Detalles
         </Button>
         <Button variant="outline" size="sm" onClick={() => onEdit(fee)}>
           <Edit className="mr-2 h-4 w-4" /> Editar
@@ -67,6 +67,6 @@ export function ExtraordinaryFeeCard({
           <Trash2 className="mr-2 h-4 w-4" /> Borrar
         </Button>
       </CardFooter>
-    </Card>
-  );
+    </Card>);
+
 }

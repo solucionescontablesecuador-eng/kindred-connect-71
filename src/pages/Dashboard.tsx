@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { CollectionProgress } from "@/components/dashboard/CollectionProgress";
+import { KpiDetailModal } from "@/components/dashboard/KpiDetailModal";
 import { useBuilding } from "@/hooks/useBuilding";
 import { useApartments } from "@/hooks/useApartments";
 import { usePayments } from "@/hooks/usePayments";
 import { Skeleton } from "@/components/ui/skeleton";
+
+type ModalType = "total" | "paid" | "pending" | null;
 
 function DashboardContent() {
   const { building, isLoading: buildingLoading } = useBuilding();
   const { apartments, isLoading: apartmentsLoading } = useApartments();
   const currentYear = new Date().getFullYear();
   const { payments, isLoading: paymentsLoading, calculateStats } = usePayments(currentYear);
+  const [modalType, setModalType] = useState<ModalType>(null);
   
   const isLoading = buildingLoading || apartmentsLoading || paymentsLoading;
   
@@ -50,21 +55,24 @@ function DashboardContent() {
           title="Total Apartamentos" 
           value={stats.totalApartments} 
           description="Registrados en tu edificio" 
-          trend="neutral" 
+          trend="neutral"
+          onClick={() => setModalType("total")}
         />
 
         <StatCard 
           title="Pagados al Día" 
           value={stats.paidApartments} 
           description={`${(stats.paidApartments / Math.max(stats.totalApartments, 1) * 100).toFixed(0)}% de los apartamentos`} 
-          trend="up" 
+          trend="up"
+          onClick={() => setModalType("paid")}
         />
 
         <StatCard 
           title="Pagos Pendientes" 
           value={stats.pendingApartments} 
           description="Apartamentos con saldo pendiente" 
-          trend={stats.pendingApartments > 0 ? "down" : "neutral"} 
+          trend={stats.pendingApartments > 0 ? "down" : "neutral"}
+          onClick={() => setModalType("pending")}
         />
 
         <StatCard 
@@ -90,6 +98,14 @@ function DashboardContent() {
       </div>
 
       <CollectionProgress collected={stats.totalCollected} target={stats.monthlyTarget} percentage={stats.collectionProgress} />
+
+      <KpiDetailModal
+        type={modalType}
+        onClose={() => setModalType(null)}
+        apartments={apartments}
+        payments={payments}
+        monthlyFee={building?.monthly_fee || 0}
+      />
     </div>
   );
 }

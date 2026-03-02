@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Apartment } from "@/hooks/useApartments";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,23 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-
-interface PendingSummary {
-  pendingMonths: string[];
-  pendingExtraordinary: string[];
-}
 
 interface ApartmentCardProps {
   apartment: Apartment;
   isPaidThisMonth: boolean;
-  pendingSummary?: PendingSummary;
   onEdit: (apartment: Apartment) => void;
   onDelete: (apartment: Apartment) => void;
 }
 
-export function ApartmentCard({ apartment, isPaidThisMonth, pendingSummary, onEdit, onDelete }: ApartmentCardProps) {
-  const hasPending = !isPaidThisMonth || (pendingSummary && (pendingSummary.pendingMonths.length > 0 || pendingSummary.pendingExtraordinary.length > 0));
+export const ApartmentCard = memo(function ApartmentCard({ apartment, isPaidThisMonth, onEdit, onDelete }: ApartmentCardProps) {
+  const hasPending = !isPaidThisMonth;
 
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -32,9 +26,7 @@ export function ApartmentCard({ apartment, isPaidThisMonth, pendingSummary, onEd
           <CardTitle className="flex items-center gap-2 text-lg">
             Apt. {apartment.apartment_number}
             {hasPending && (
-              <Badge variant="destructive">
-                Pendiente
-              </Badge>
+              <span className="text-sm font-medium text-destructive">Pendiente</span>
             )}
           </CardTitle>
         </div>
@@ -73,4 +65,4 @@ export function ApartmentCard({ apartment, isPaidThisMonth, pendingSummary, onEd
       </CardContent>
     </Card>
   );
-}
+});

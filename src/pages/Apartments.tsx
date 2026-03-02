@@ -162,7 +162,6 @@ function ApartmentsContent() {
               key={apartment.id} 
               apartment={apartment} 
               isPaidThisMonth={isApartmentPaidThisMonth(apartment.id)}
-              pendingSummary={getPendingSummary(apartment.id)}
               onEdit={handleEdit} 
               onDelete={setDeletingApartment} 
             />

@@ -1,5 +1,5 @@
+import { memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Apartment } from "@/hooks/useApartments";
@@ -16,11 +16,11 @@ interface KpiDetailModalProps {
 }
 
 const MONTH_NAMES = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
-export function KpiDetailModal({ type, onClose, apartments, payments, monthlyFee }: KpiDetailModalProps) {
+export const KpiDetailModal = memo(function KpiDetailModal({ type, onClose, apartments, payments, monthlyFee }: KpiDetailModalProps) {
   if (!type) return null;
 
   const currentMonth = new Date().getMonth() + 1;
@@ -101,9 +101,9 @@ export function KpiDetailModal({ type, onClose, apartments, payments, monthlyFee
                       <TableCell>{apt.owner_full_name}</TableCell>
                       {type === "total" && (
                         <TableCell className="text-center">
-                          <Badge variant={isPaid ? "default" : "destructive"}>
+                          <span className={isPaid ? "text-foreground" : "text-destructive"}>
                             {isPaid ? "Al día" : "Pendiente"}
-                          </Badge>
+                          </span>
                         </TableCell>
                       )}
                       {type === "pending" && (
@@ -113,14 +113,14 @@ export function KpiDetailModal({ type, onClose, apartments, payments, monthlyFee
                               {pendingMonths.join(", ")}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right font-mono text-destructive font-medium">
+                          <TableCell className="text-right font-medium text-destructive">
                             ${pendingAmount.toFixed(2)}
                           </TableCell>
                         </>
                       )}
                       {type === "paid" && (
                         <TableCell className="text-center">
-                          <Badge variant="default">Pagado</Badge>
+                          <span className="text-foreground">Pagado</span>
                         </TableCell>
                       )}
                     </TableRow>
@@ -133,4 +133,4 @@ export function KpiDetailModal({ type, onClose, apartments, payments, monthlyFee
       </DialogContent>
     </Dialog>
   );
-}
+});

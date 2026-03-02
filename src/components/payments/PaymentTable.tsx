@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { Apartment } from "@/hooks/useApartments";
 import { Payment } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -13,12 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { PaymentModal } from "./PaymentModal";
 import { ArrowUpDown, Search } from "lucide-react";
 
@@ -42,14 +35,14 @@ interface PaymentTableProps {
 }
 
 const MONTHS = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
 type SortKey = "apartment" | "balance";
 type SortDir = "asc" | "desc";
 
-export function PaymentTable({
+export const PaymentTable = memo(function PaymentTable({
   apartments,
   payments,
   year,
@@ -67,27 +60,35 @@ export function PaymentTable({
   const [sortKey, setSortKey] = useState<SortKey>("apartment");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
-  const getPayment = (apartmentId: string, month: number) => {
-    return payments.find(
-      (p) => p.apartment_id === apartmentId && p.month === month
-    );
-  };
+  const paymentMap = useMemo(() => {
+    const map = new Map<string, Payment>();
+    for (const p of payments) {
+      map.set(`${p.apartment_id}-${p.month}`, p);
+    }
+    return map;
+  }, [payments]);
 
-  const handleCellClick = (apartment: Apartment, month: number) => {
+  const getPayment = useCallback((apartmentId: string, month: number) => {
+    return paymentMap.get(`${apartmentId}-${month}`);
+  }, [paymentMap]);
+
+  const handleCellClick = useCallback((apartment: Apartment, month: number) => {
     const payment = getPayment(apartment.id, month);
     setSelectedPayment({ apartment, month, payment: payment || null });
-  };
+  }, [getPayment]);
 
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(d => d === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
+  const toggleSort = useCallback((key: SortKey) => {
+    setSortKey(prev => {
+      if (prev === key) {
+        setSortDir(d => d === "asc" ? "desc" : "asc");
+        return prev;
+      }
       setSortDir("asc");
-    }
-  };
+      return key;
+    });
+  }, []);
 
-  const isOverdue = (month: number) => {
+  const isOverdue = useCallback((month: number) => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
@@ -98,30 +99,33 @@ export function PaymentTable({
     if (month < currentMonth) return true;
     if (month === currentMonth && currentDay >= cutoffDay) return true;
     return false;
-  };
+  }, [year, cutoffDay]);
 
-  const getBalance = (apartmentId: string) => {
-    return MONTHS.reduce((acc, _, monthIndex) => {
-      const payment = getPayment(apartmentId, monthIndex + 1);
+  const getBalance = useCallback((apartmentId: string) => {
+    let balance = 0;
+    for (let m = 1; m <= 12; m++) {
+      const payment = paymentMap.get(`${apartmentId}-${m}`);
       if (!payment || payment.status === "pending") {
-        return acc + monthlyFee;
+        balance += monthlyFee;
       }
-      return acc;
-    }, 0);
-  };
-
-  const filteredApartments = apartments.filter(apt =>
-    apt.apartment_number.toLowerCase().includes(search.toLowerCase()) ||
-    apt.owner_full_name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const sortedApartments = [...filteredApartments].sort((a, b) => {
-    const dir = sortDir === "asc" ? 1 : -1;
-    if (sortKey === "apartment") {
-      return a.apartment_number.localeCompare(b.apartment_number, undefined, { numeric: true }) * dir;
     }
-    return (getBalance(a.id) - getBalance(b.id)) * dir;
-  });
+    return balance;
+  }, [paymentMap, monthlyFee]);
+
+  const sortedApartments = useMemo(() => {
+    const filtered = apartments.filter(apt =>
+      apt.apartment_number.toLowerCase().includes(search.toLowerCase()) ||
+      apt.owner_full_name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return [...filtered].sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      if (sortKey === "apartment") {
+        return a.apartment_number.localeCompare(b.apartment_number, undefined, { numeric: true }) * dir;
+      }
+      return (getBalance(a.id) - getBalance(b.id)) * dir;
+    });
+  }, [apartments, search, sortKey, sortDir, getBalance]);
 
   return (
     <div className="space-y-4">
@@ -134,20 +138,6 @@ export function PaymentTable({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-sm bg-emerald-500/20 border border-emerald-500/40" />
-            Pagado
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-sm bg-muted border border-border" />
-            Pendiente
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-sm bg-destructive/20 border border-destructive/40" />
-            Vencido
-          </span>
         </div>
       </div>
 
@@ -166,8 +156,8 @@ export function PaymentTable({
                   <ArrowUpDown className="ml-1 h-3 w-3" />
                 </Button>
               </TableHead>
-              {MONTHS.map((month, i) => (
-                <TableHead key={month} className="text-center min-w-[72px] px-1">
+              {MONTHS.map((month) => (
+                <TableHead key={month} className="text-center min-w-[90px] px-1">
                   <span className="text-xs font-medium">{month}</span>
                 </TableHead>
               ))}
@@ -204,37 +194,25 @@ export function PaymentTable({
 
                     return (
                       <TableCell key={month} className="text-center p-1">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                className={`inline-flex items-center justify-center h-8 w-full rounded-md text-xs font-medium transition-colors cursor-pointer font-mono ${
-                                  isPaid
-                                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25"
-                                    : overdue
-                                    ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
-                                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                                }`}
-                                onClick={() => handleCellClick(apartment, month)}
-                              >
-                                {isPaid && payment ? `$${Number(payment.amount).toFixed(0)}` : overdue ? `$${monthlyFee.toFixed(0)}` : "—"}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{isPaid ? "Pagado" : overdue ? "Vencido" : "Pendiente"} — {MONTHS[monthIndex]} {year}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <button
+                          className="inline-flex items-center justify-center h-8 w-full rounded-md text-xs font-medium transition-colors cursor-pointer hover:bg-muted/80"
+                          onClick={() => handleCellClick(apartment, month)}
+                        >
+                          <span className={overdue ? "text-destructive font-semibold" : "text-foreground"}>
+                            {isPaid && payment
+                              ? `$${Number(payment.amount).toFixed(0)}`
+                              : overdue
+                              ? `$${monthlyFee.toFixed(0)}`
+                              : "—"}
+                          </span>
+                        </button>
                       </TableCell>
                     );
                   })}
                   <TableCell className="text-center">
-                    <Badge
-                      variant={balance === 0 ? "default" : "destructive"}
-                      className="font-mono text-xs"
-                    >
+                    <span className={`text-sm font-medium ${balance > 0 ? "text-destructive" : "text-foreground"}`}>
                       ${balance.toFixed(2)}
-                    </Badge>
+                    </span>
                   </TableCell>
                 </TableRow>
               );
@@ -259,4 +237,4 @@ export function PaymentTable({
       )}
     </div>
   );
-}
+});

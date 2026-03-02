@@ -8,12 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface PendingSummary {
   pendingMonths: string[];
@@ -38,34 +32,9 @@ export function ApartmentCard({ apartment, isPaidThisMonth, pendingSummary, onEd
           <CardTitle className="flex items-center gap-2 text-lg">
             Apt. {apartment.apartment_number}
             {hasPending && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="destructive" className="cursor-help">
-                      Pendiente
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-[260px]">
-                    <div className="space-y-1.5 text-xs">
-                      {pendingSummary && pendingSummary.pendingMonths.length > 0 && (
-                        <div>
-                          <p className="font-semibold">Cuotas mensuales:</p>
-                          <p className="text-muted-foreground">{pendingSummary.pendingMonths.join(", ")}</p>
-                        </div>
-                      )}
-                      {pendingSummary && pendingSummary.pendingExtraordinary.length > 0 && (
-                        <div>
-                          <p className="font-semibold">Cuotas extraordinarias:</p>
-                          <p className="text-muted-foreground">{pendingSummary.pendingExtraordinary.join(", ")}</p>
-                        </div>
-                      )}
-                      {(!pendingSummary || (pendingSummary.pendingMonths.length === 0 && pendingSummary.pendingExtraordinary.length === 0)) && (
-                        <p>Pago del mes actual pendiente</p>
-                      )}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Badge variant="destructive">
+                Pendiente
+              </Badge>
             )}
           </CardTitle>
         </div>
